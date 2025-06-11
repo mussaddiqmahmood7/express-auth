@@ -9,18 +9,16 @@ const userSchema = new mongoose.Schema({
   phone: { type: String },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  avatar: { type: String, required: true },
   refreshToken: { type: String },
 });
 
 const preRegisterUserSchema = new mongoose.Schema({
   first_name: { type: String, required: true },
   last_name: { type: String, required: true },
-  phone: { type: String },
+  phone: { type: String,default:null },
   email: { type: String, required: true },
   password: { type: String, required: true },
-  avatar: { type: String, required: true },
-  verifyToken: { type: String, required: true },
+  verifyToken: { type: String, },
 });
 
 userSchema.pre("save", function (next) {
@@ -35,10 +33,13 @@ preRegisterUserSchema.pre("save", function (next) {
     this.password = bcrypt.hashSync(this.password, 10);
   }
   if (this.isNew) {
+    if (!this._id) {
+      this._id = new mongoose.Types.ObjectId(); 
+    }
     this.verifyToken = jwt.sign(
       { _id: this._id },
       config.VerifyTokenSecret,
-      { expiresIn: 60 * 60 }
+      { expiresIn: 30 }
     );
   }
   next()
@@ -49,7 +50,7 @@ userSchema.methods.comparePassword = function (password: string) {
 };
 
 userSchema.methods.generateRefreshToken = function () {
-  return jwt.sign({ email: this.email }, config.RefreshTokenSecret, {
+  this.refreshToken = jwt.sign({ email: this.email }, config.RefreshTokenSecret, {
     expiresIn: 24 * 60 * 60,
   });
 };
