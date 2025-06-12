@@ -4,17 +4,18 @@ import jwt from "jsonwebtoken";
 import { config } from "../config/config.js";
 
 const userSchema = new mongoose.Schema({
-  first_name: { type: String, required: true },
-  last_name: { type: String, required: true },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
   phone: { type: String },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   refreshToken: { type: String },
+  forgotToken: { type: String },
 });
 
 const preRegisterUserSchema = new mongoose.Schema({
-  first_name: { type: String, required: true },
-  last_name: { type: String, required: true },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
   phone: { type: String,default:null },
   email: { type: String, required: true },
   password: { type: String, required: true },
@@ -53,6 +54,14 @@ userSchema.methods.generateRefreshToken = function () {
   this.refreshToken = jwt.sign({ email: this.email }, config.RefreshTokenSecret, {
     expiresIn: 24 * 60 * 60,
   });
+  return this.refreshToken
+};
+
+userSchema.methods.generateForgotToken = function () {
+  this.forgotToken = jwt.sign({ _id: this._id }, config.ForgotTokenSecret, {
+    expiresIn:  60 * 60,
+  });
+  return this.forgotToken
 };
 
 userSchema.methods.generateAccessToken = function () {

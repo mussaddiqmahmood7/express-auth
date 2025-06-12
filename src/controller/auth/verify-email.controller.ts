@@ -6,12 +6,13 @@ import { PreRegisterUser, User } from "../../models/user.model.js";
 import { ErrorResponse } from "../../lib/errorResponse.js";
 import { APIResponse } from "../../lib/apiResponse.js";
 import { config } from "../../config/config.js";
+import { cookieOptions } from "../../lib/cookieOptions.js";
 
 interface VerifyEmailProps {
   verify_token: string;
 }
 
-export const VerifyEmail = asyncHandler(async (req: Request, res: Response) => {
+export const VerifyEmailController = asyncHandler(async (req: Request, res: Response) => {
   validateData(req.body, ["verify_token"]);
   const { verify_token } = req.body as VerifyEmailProps;
 
@@ -23,7 +24,7 @@ export const VerifyEmail = asyncHandler(async (req: Request, res: Response) => {
   if (!decoded?._id) {
     throw new ErrorResponse(400, "Invalid Email Verify Token");
   }
- 
+
   const preUser = await PreRegisterUser.findById(decoded?._id);
 
   if (!preUser) {
@@ -36,7 +37,7 @@ export const VerifyEmail = asyncHandler(async (req: Request, res: Response) => {
   }
   const verifyUser = await User.create(preUser.toObject());
   const accessToken = verifyUser.generateAccessToken();
-  verifyUser.generateRefreshToken();
+  const refreshToken = verifyUser.generateRefreshToken();
   await verifyUser.save();
   const user = await User.findOne({ _id: verifyUser._id }).select(
     "-password -_id -__v"
@@ -49,8 +50,8 @@ export const VerifyEmail = asyncHandler(async (req: Request, res: Response) => {
 
   res
     .status(201)
-    .cookie("accessToken", accessToken)
-    .cookie("refreshToken", user.refreshToken)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
     .json(
       new APIResponse(201, "User verified succuessfully", {
         ...user.toObject(),

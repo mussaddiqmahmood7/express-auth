@@ -6,26 +6,29 @@ import { PreRegisterUser, User } from "../../models/user.model.js";
 import { ErrorResponse } from "../../lib/errorResponse.js";
 
 interface RegisterProps {
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone: string | undefined;
   password: string;
 }
 
-export const RegisterUser = asyncHandler(
+export const RegisterUserController = asyncHandler(
   async (req: Request, res: Response) => {
+    validateData(req.body, ["firstName", "lastName", "email", "password"]);
     const body = req.body as RegisterProps;
-    validateData(body, ["first_name", "last_name", "email", "password"]);
     const { email } = body;
-
-    const user = await User.find({ email: email.toLocaleLowerCase() });
+    const lowerEmail = email.toLocaleLowerCase();
+    const user = await User.find({ email: lowerEmail });
     console.log("user : ", user);
     if (user[0]) {
       throw new ErrorResponse(400, "User already exist");
     }
 
-    const newUser = await PreRegisterUser.create({ ...body });
+    const newUser = await PreRegisterUser.create({
+      ...body,
+      email: lowerEmail,
+    });
     const { email: userEmail, verifyToken } = newUser;
 
     res
@@ -34,7 +37,7 @@ export const RegisterUser = asyncHandler(
         new APIResponse(
           200,
           "User Created, Verification Email sended to your email",
-          {email:userEmail, verifyToken}
+          { email: userEmail, verifyToken }
         )
       );
   }

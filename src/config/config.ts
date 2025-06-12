@@ -5,6 +5,7 @@ interface ConfigProps{
     RefreshTokenSecret:string,
     AccessTokenSecret:string,
     VerifyTokenSecret:string,
+    ForgotTokenSecret:string,
 }
 
 export const config:ConfigProps={
@@ -14,4 +15,5 @@ export const config:ConfigProps={
     RefreshTokenSecret:process.env.RefreshTokenSecret ?? '',
     AccessTokenSecret:process.env.AccessTokenSecret ?? '',
     VerifyTokenSecret:process.env.VerifyTokenSecret ?? '',
+    ForgotTokenSecret:process.env.ForgotTokenSecret ?? '',
 }

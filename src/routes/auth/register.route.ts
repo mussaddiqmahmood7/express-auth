@@ -1,12 +1,19 @@
 import express from "express";
-import { RegisterUser } from "../../controller/auth/register.controller.js";
-import { VerifyEmail } from "../../controller/auth/verify-email.controller.js";
-const router = express.Router()
+import { RegisterUserController } from "../../controller/auth/register.controller.js";
+import { VerifyEmailController } from "../../controller/auth/verify-email.controller.js";
+import { LoginUserController } from "../../controller/auth/login.controller.js";
+import { ForgotPasswordController } from "../../controller/auth/forgot.controller.js";
+import { APIResponse } from "../../lib/apiResponse.js";
+import { UpdatePasswordController } from "../../controller/auth/update-password.controller.js";
+const router = express.Router();
 
-router.get('/',(_,res)=>{
-    res.status(200).json({title:'thanks for hit'})
-})
-router.post('/register',RegisterUser)
-router.post('/verify-email-token',VerifyEmail)
+router.get("/", (_, res) => {
+  res.status(200).json(new APIResponse(200, "Example Response", {}));
+});
+router.post("/register", RegisterUserController);
+router.post("/verify-email-token", VerifyEmailController);
+router.post("/login", LoginUserController);
+router.post("/forgot-password", ForgotPasswordController);
+router.post("/update-password", UpdatePasswordController);
 
-export const userRouter = router
+export const userRouter = router;
