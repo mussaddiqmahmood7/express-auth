@@ -5,6 +5,8 @@ import { LoginUserController } from "../../controller/auth/login.controller.js";
 import { ForgotPasswordController } from "../../controller/auth/forgot.controller.js";
 import { APIResponse } from "../../lib/apiResponse.js";
 import { UpdatePasswordController } from "../../controller/auth/update-password.controller.js";
+import { VerifyAccessTokenMiddleware } from "../../middleware/verify-access-token.middleware.js";
+import { LogoutController } from "../../controller/auth/logout.controller.js";
 const router = express.Router();
 
 router.get("/", (_, res) => {
@@ -15,5 +17,9 @@ router.post("/verify-email-token", VerifyEmailController);
 router.post("/login", LoginUserController);
 router.post("/forgot-password", ForgotPasswordController);
 router.post("/update-password", UpdatePasswordController);
+router.post("/update-password", UpdatePasswordController);
+router.post("/logout", VerifyAccessTokenMiddleware, LogoutController);
 
 export const userRouter = router;
+
+

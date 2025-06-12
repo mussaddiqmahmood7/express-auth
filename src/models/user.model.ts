@@ -16,17 +16,17 @@ const userSchema = new mongoose.Schema({
 const preRegisterUserSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
-  phone: { type: String,default:null },
+  phone: { type: String, default: null },
   email: { type: String, required: true },
   password: { type: String, required: true },
-  verifyToken: { type: String, },
+  verifyToken: { type: String },
 });
 
 userSchema.pre("save", function (next) {
   if (this.isModified("password") && !this.isNew) {
     this.password = bcrypt.hashSync(this.password, 10);
   }
-  next()
+  next();
 });
 
 preRegisterUserSchema.pre("save", function (next) {
@@ -35,15 +35,13 @@ preRegisterUserSchema.pre("save", function (next) {
   }
   if (this.isNew) {
     if (!this._id) {
-      this._id = new mongoose.Types.ObjectId(); 
+      this._id = new mongoose.Types.ObjectId();
     }
-    this.verifyToken = jwt.sign(
-      { _id: this._id },
-      config.VerifyTokenSecret,
-      { expiresIn: 30 }
-    );
+    this.verifyToken = jwt.sign({ _id: this._id }, config.VerifyTokenSecret, {
+      expiresIn: 30,
+    });
   }
-  next()
+  next();
 });
 
 userSchema.methods.comparePassword = function (password: string) {
@@ -51,17 +49,21 @@ userSchema.methods.comparePassword = function (password: string) {
 };
 
 userSchema.methods.generateRefreshToken = function () {
-  this.refreshToken = jwt.sign({ email: this.email }, config.RefreshTokenSecret, {
-    expiresIn: 24 * 60 * 60,
-  });
-  return this.refreshToken
+  this.refreshToken = jwt.sign(
+    { email: this.email },
+    config.RefreshTokenSecret,
+    {
+      expiresIn: 24 * 60 * 60,
+    }
+  );
+  return this.refreshToken;
 };
 
 userSchema.methods.generateForgotToken = function () {
   this.forgotToken = jwt.sign({ _id: this._id }, config.ForgotTokenSecret, {
-    expiresIn:  60 * 60,
+    expiresIn: 60 * 60,
   });
-  return this.forgotToken
+  return this.forgotToken;
 };
 
 userSchema.methods.generateAccessToken = function () {
@@ -71,7 +73,6 @@ userSchema.methods.generateAccessToken = function () {
 };
 
 export const User = mongoose.models.User || mongoose.model("User", userSchema);
-export const PreRegisterUser = mongoose.models.PreRegisterUser || mongoose.model(
-  "PreRegisterUser",
-  preRegisterUserSchema
-);
+export const PreRegisterUser =
+  mongoose.models.PreRegisterUser ||
+  mongoose.model("PreRegisterUser", preRegisterUserSchema);

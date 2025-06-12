@@ -9,53 +9,59 @@ import { config } from "../../config/config.js";
 import { cookieOptions } from "../../lib/cookieOptions.js";
 
 interface VerifyEmailProps {
-  verify_token: string;
+  verifyToken: string;
 }
 
-export const VerifyEmailController = asyncHandler(async (req: Request, res: Response) => {
-  validateData(req.body, ["verify_token"]);
-  const { verify_token } = req.body as VerifyEmailProps;
+export const VerifyEmailController = asyncHandler(
+  async (req: Request, res: Response) => {
+    validateData(req.body, ["verifyToken"]);
+    const { verifyToken } = req.body as VerifyEmailProps;
 
-  const decoded = jwt.verify(verify_token, config.VerifyTokenSecret) as {
-    _id: string | undefined;
-    exp: number | undefined;
-  };
+    let decoded;
+    try {
+      decoded = jwt.verify(verifyToken, config.VerifyTokenSecret) as {
+        _id: string | undefined;
+      };
+    } catch (err) {
+      throw new ErrorResponse(403, "Invalid or expired refresh token");
+    }
 
-  if (!decoded?._id) {
-    throw new ErrorResponse(400, "Invalid Email Verify Token");
-  }
+    if (!decoded?._id) {
+      throw new ErrorResponse(400, "Invalid Email Verify Token");
+    }
 
-  const preUser = await PreRegisterUser.findById(decoded?._id);
+    const preUser = await PreRegisterUser.findById(decoded?._id);
 
-  if (!preUser) {
-    throw new ErrorResponse(400, "Invalid Email Verify Token");
-  }
-  console.log("preUser ", preUser);
-  const alreadyUser = await User.findOne({ email: preUser.email });
-  if (alreadyUser) {
-    throw new ErrorResponse(400, "User already exist");
-  }
-  const verifyUser = await User.create(preUser.toObject());
-  const accessToken = verifyUser.generateAccessToken();
-  const refreshToken = verifyUser.generateRefreshToken();
-  await verifyUser.save();
-  const user = await User.findOne({ _id: verifyUser._id }).select(
-    "-password -_id -__v"
-  );
-  console.log("user : ", user);
-  if (!user) {
-    throw new ErrorResponse(500, "Internal Server Error");
-  }
-  await PreRegisterUser.deleteMany({ email: user.email });
-
-  res
-    .status(201)
-    .cookie("accessToken", accessToken, cookieOptions)
-    .cookie("refreshToken", refreshToken, cookieOptions)
-    .json(
-      new APIResponse(201, "User verified succuessfully", {
-        ...user.toObject(),
-        accessToken,
-      })
+    if (!preUser) {
+      throw new ErrorResponse(400, "Invalid Email Verify Token");
+    }
+    console.log("preUser ", preUser);
+    const alreadyUser = await User.findOne({ email: preUser.email });
+    if (alreadyUser) {
+      throw new ErrorResponse(400, "User already exist");
+    }
+    const verifyUser = await User.create(preUser.toObject());
+    const accessToken = verifyUser.generateAccessToken();
+    const refreshToken = verifyUser.generateRefreshToken();
+    await verifyUser.save();
+    const user = await User.findOne({ _id: verifyUser._id }).select(
+      "-password -_id -__v"
     );
-});
+    console.log("user : ", user);
+    if (!user) {
+      throw new ErrorResponse(500, "Internal Server Error");
+    }
+    await PreRegisterUser.deleteMany({ email: user.email });
+
+    res
+      .status(201)
+      .cookie("accessToken", accessToken, cookieOptions)
+      .cookie("refreshToken", refreshToken, cookieOptions)
+      .json(
+        new APIResponse(201, "User verified succuessfully", {
+          ...user.toObject(),
+          accessToken,
+        })
+      );
+  }
+);

@@ -16,9 +16,16 @@ interface UpdatePasswordProps {
 export const UpdatePasswordController = asyncHandler(async (req: Request, res: Response) => {
   validateData(req.body, ["forgot_token", "password"]);
   const { forgotToken, password } = req.body as UpdatePasswordProps;
-  const decoded = jwt.verify(forgotToken, config.ForgotTokenSecret) as {
-    _id: string | undefined;
-  };
+    
+  let decoded;
+      try {
+        decoded = jwt.verify(forgotToken, config.ForgotTokenSecret) as {
+          _id: string | undefined;
+        };
+      } catch (err) {
+        throw new ErrorResponse(403, "Invalid or expired refresh token");
+      }
+      
   if (!decoded._id) {
     throw new ErrorResponse(403, "Invalid Token");
   }
