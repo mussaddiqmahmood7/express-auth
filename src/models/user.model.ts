@@ -3,24 +3,30 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { config } from "../config/config.js";
 
-const userSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  phone: { type: String },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  refreshToken: { type: String },
-  forgotToken: { type: String },
-});
+const userSchema = new mongoose.Schema(
+  {
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    phone: { type: String },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    refreshToken: { type: String },
+    forgotToken: { type: String },
+  },
+  { timestamps: true }
+);
 
-const preRegisterUserSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  phone: { type: String, default: null },
-  email: { type: String, required: true },
-  password: { type: String, required: true },
-  verifyToken: { type: String },
-});
+const preRegisterUserSchema = new mongoose.Schema(
+  {
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
+    phone: { type: String, default: null },
+    email: { type: String, required: true },
+    password: { type: String, required: true },
+    verifyToken: { type: String },
+  },
+  { timestamps: true }
+);
 
 userSchema.pre("save", function (next) {
   if (this.isModified("password") && !this.isNew) {
