@@ -16,9 +16,11 @@ export const VerifyAccessTokenMiddleware = asyncHandler(
 
     let decoded;
     try {
+      
       decoded = jwt.verify(accessToken, config.AccessTokenSecret) as {
         _id: string | undefined;
       };
+
     } catch (err) {
       throw new ErrorResponse(403, "Invalid or expired refresh token");
     }

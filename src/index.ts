@@ -34,6 +34,6 @@ app.use(
   }
 );
 
-app.listen(3000, () => {
-  console.log("server is runing on port 3000");
+app.listen(config.PORT, () => {
+  console.log("server is runing on port : ",config.PORT);
 });
