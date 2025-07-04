@@ -11,7 +11,7 @@ interface ConfigProps{
 export const config:ConfigProps={
     DB_URL: process.env.DB_URL ?? '',
     V1_URL: process.env.V1_URL ?? '',
-    PORT: Number(process.env.PORT),
+    PORT: Number(process.env.PORT) ?? 8000,
     RefreshTokenSecret:process.env.RefreshTokenSecret ?? '',
     AccessTokenSecret:process.env.AccessTokenSecret ?? '',
     VerifyTokenSecret:process.env.VerifyTokenSecret ?? '',

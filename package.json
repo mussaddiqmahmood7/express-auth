@@ -10,7 +10,7 @@
   "license": "ISC",
   "author": "Mussaddiq Mahmood",
   "type": "module",
-  "main": "index.ts",
+  "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon",
     "build": "tsc",
